@@ -4,9 +4,9 @@ import "strings"
 
 
 type node struct{
-	// specific string
+	// specific string like go/:lang/123
 	pattern string
-	// certain parts
+	// certain parts// like go or :lang
 	part string
 	children []*node
 	// wild card matching
