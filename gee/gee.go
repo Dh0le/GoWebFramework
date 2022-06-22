@@ -3,6 +3,7 @@ package gee
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 // HandlerFunc defines the request handler used by gee
@@ -46,6 +47,12 @@ func (group *RouterGroup)Group(prefix string)*RouterGroup{
 	return newGroup
 }
 
+//Use is define to add new middleware into the group
+
+func(group *RouterGroup)Use(middlewares ...HandlerFunc){
+	group.middlewares = append(group.middlewares, middlewares...)
+}
+
 
 
 // method that we use to add REST api
@@ -72,7 +79,14 @@ func (engine *Engine) Run(addr string) (err error){
 }
 
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request){
+	var middlewares []HandlerFunc
+	for _,group:=range engine.groups{
+		if strings.HasPrefix(req.URL.Path,group.prefix){
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
 	c := newContext(w,req)
+	c.handlers  = middlewares
 	engine.router.handle(c)
 }
 
